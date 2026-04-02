@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login – IIT Patna Event Reminder</title>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:     #003B73;
+      --blue-mid: #0057A8;
+      --blue-lt:  #D6E8FF;
+      --gold:     #C8922A;
+      --white:    #FAFCFF;
+      --grey:     #8A9BB5;
+      --border:   #C5D7EF;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--blue);
+      overflow: hidden;
+    }
+
+    /* ── Left panel ── */
+    .left {
+      width: 46%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 64px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(0,87,168,.45) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 80% at 80% 80%, rgba(0,30,70,.6)   0%, transparent 60%);
+    }
+
+    /* decorative circles */
+    .left::after {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,146,42,.18);
+      top: -100px; right: -180px;
+    }
+
+    .ring {
+      position: absolute;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,146,42,.12);
+      bottom: -60px; left: -60px;
+      pointer-events: none;
+    }
+
+    .left-content { position: relative; z-index: 1; }
+
+    .iit-badge {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 56px;
+      animation: fadeUp .6s ease both;
+    }
+
+    .badge-circle {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IM Fell English', serif;
+      font-size: 18px;
+      color: #fff;
+      letter-spacing: -.5px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(200,146,42,.4);
+    }
+
+    .badge-text { line-height: 1.25; }
+    .badge-text strong { display: block; color: #fff; font-size: 14px; letter-spacing: .04em; font-weight: 600; }
+    .badge-text span   { color: rgba(255,255,255,.55); font-size: 12px; }
+
+    .hero-title {
+      font-family: 'IM Fell English', serif;
+      font-size: clamp(34px, 3.8vw, 52px);
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      animation: fadeUp .7s .1s ease both;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,.55);
+      line-height: 1.7;
+      max-width: 320px;
+      animation: fadeUp .7s .2s ease both;
+    }
+
+    .divider {
+      width: 48px; height: 2px;
+      background: var(--gold);
+      margin: 32px 0;
+      animation: fadeUp .7s .3s ease both;
+    }
+
+    .stat-row {
+      display: flex; gap: 36px;
+      animation: fadeUp .7s .4s ease both;
+    }
+
+    .stat { }
+    .stat-n { font-size: 28px; font-weight: 600; color: #fff; line-height: 1; }
+    .stat-l { font-size: 11px; color: rgba(255,255,255,.45); letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
+
+    /* ── Right panel ── */
+    .right {
+      flex: 1;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 56px;
+      position: relative;
+      clip-path: polygon(40px 0%, 100% 0%, 100% 100%, 0% 100%);
+      animation: slideIn .5s ease both;
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .form-tag {
+      display: inline-block;
+      background: var(--blue-lt);
+      color: var(--blue-mid);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      animation: fadeUp .6s .2s ease both;
+    }
+
+    .form-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 32px;
+      color: var(--blue);
+      margin-bottom: 6px;
+      animation: fadeUp .6s .25s ease both;
+    }
+
+    .form-sub {
+      font-size: 13.5px;
+      color: var(--grey);
+      margin-bottom: 36px;
+      animation: fadeUp .6s .3s ease both;
+    }
+
+    .field {
+      margin-bottom: 20px;
+      animation: fadeUp .6s ease both;
+    }
+
+    .field:nth-child(4) { animation-delay: .35s; }
+    .field:nth-child(5) { animation-delay: .4s; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--blue);
+      letter-spacing: .04em;
+      margin-bottom: 7px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--grey); pointer-events: none;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--blue);
+      background: #fff;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue-mid);
+      box-shadow: 0 0 0 3px rgba(0,87,168,.1);
+    }
+
+    .toggle-pw {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--grey);
+      display: flex; align-items: center;
+    }
+
+    .row-opts {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px;
+      animation: fadeUp .6s .45s ease both;
+    }
+
+    .remember {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--grey); cursor: pointer;
+    }
+
+    .remember input[type="checkbox"] { display: none; }
+
+    .chk-box {
+      width: 16px; height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+
+    .remember input:checked + .chk-box {
+      background: var(--blue-mid);
+      border-color: var(--blue-mid);
+    }
+
+    .remember input:checked + .chk-box::after {
+      content: '';
+      width: 9px; height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+
+    .forgot { font-size: 13px; color: var(--blue-mid); text-decoration: none; font-weight: 500; }
+    .forgot:hover { text-decoration: underline; }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .03em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background .2s, transform .15s;
+      animation: fadeUp .6s .5s ease both;
+    }
+
+    .btn-login::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background .2s;
+    }
+
+    .btn-login:hover { background: var(--blue-mid); transform: translateY(-1px); }
+    .btn-login:active { transform: translateY(0); }
+
+    .btn-login.loading .btn-text { opacity: 0; }
+    .btn-login.loading::before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin .7s linear infinite;
+    }
+
+    .error-msg {
+      background: #FFF0F0;
+      border: 1px solid #FFBEBE;
+      color: #C0392B;
+      border-radius: 8px;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: none;
+      animation: shake .3s ease;
+    }
+
+    .error-msg.show { display: flex; align-items: center; gap: 8px; }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 12px;
+      color: var(--grey);
+      animation: fadeUp .6s .6s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { clip-path: polygon(80px 0%, 100% 0%, 100% 100%, 40px 100%); opacity: 0; }
+      to   { clip-path: polygon(40px 0%, 100% 0%, 100% 100%, 0% 100%); opacity: 1; }
+    }
+
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-6px); }
+      75%      { transform: translateX(6px); }
+    }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; overflow: auto; }
+      .left { width: 100%; padding: 40px 32px; }
+      .right { clip-path: none; padding: 40px 32px; }
+      .stat-row { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div class="ring"></div>
+    <div class="left-content">
+
+      <div class="iit-badge">
+        <div class="badge-circle">IIT</div>
+        <div class="badge-text">
+          <strong>IIT Patna</strong>
+          <span>Indian Institute of Technology</span>
+        </div>
+      </div>
+
+      <h1 class="hero-title">
+        Campus<br/>
+        <em>Immersion</em><br/>
+        Reminder
+      </h1>
+
+      <p class="hero-sub">
+        Centralized event scheduling and automated push notifications for hybrid-mode students.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-n">3×</div>
+          <div class="stat-l">Reminders per event</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n">0</div>
+          <div class="stat-l">Missed sessions</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n">1</div>
+          <div class="stat-l">Central platform</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <div class="form-box">
+
+      <span class="form-tag">Faculty / Admin</span>
+      <h2 class="form-title">Welcome back</h2>
+      <p class="form-sub">Sign in to manage events and schedules.</p>
+
+      <div class="error-msg" id="errorMsg">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="errorText">Invalid email or password.</span>
+      </div>
+
+      <div class="field">
+        <label for="email">Email Address</label>
+        <div class="input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7L12 13 2 7"/></svg>
+          <input type="email" id="email" placeholder="faculty@iitp.ac.in" autocomplete="email"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password"/>
+          <button class="toggle-pw" onclick="togglePw()" type="button" id="eyeBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="eyeIcon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="row-opts">
+        <label class="remember">
+          <input type="checkbox" id="rememberMe"/>
+          <span class="chk-box"></span>
+          Remember me
+        </label>
+        <a class="forgot" href="#">Forgot password?</a>
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+        <span class="btn-text">Sign In</span>
+      </button>
+
+      <div class="form-footer">
+        Intelligent Academic Event Reminder System &nbsp;·&nbsp; IIT Patna
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function togglePw() {
+      const inp = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+      } else {
+        inp.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      document.getElementById('errorText').textContent = msg;
+      el.classList.add('show');
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+      const errorEl = document.getElementById('errorMsg');
+
+      errorEl.classList.remove('show');
+
+      if (!email) { showError('Please enter your email address.'); return; }
+      if (!password) { showError('Please enter your password.'); return; }
+      if (!/\S+@\S+\.\S+/.test(email)) { showError('Please enter a valid email address.'); return; }
+
+      // Show loading state
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      // Simulate Firebase auth (replace with real Firebase call)
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+
+        // Demo: accept admin@iitp.ac.in / admin123
+        if (email === 'admin@iitp.ac.in' && password === 'admin123') {
+          window.location.href = 'admin-dashboard.html';
+        } else {
+          showError('Invalid email or password. Try admin@iitp.ac.in / admin123');
+        }
+      }, 1400);
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  </script>
+</body>
+</html>
