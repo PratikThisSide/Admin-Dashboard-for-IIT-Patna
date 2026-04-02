@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – IIT Patna Event Reminder</title>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #003B73;
+      --blue-mid:  #0057A8;
+      --blue-lt:   #D6E8FF;
+      --blue-pale: #EEF5FF;
+      --gold:      #C8922A;
+      --gold-lt:   #FDF3E1;
+      --white:     #FAFCFF;
+      --grey:      #8A9BB5;
+      --border:    #DDE8F5;
+      --success:   #1A8C5B;
+      --success-lt:#E5F7F0;
+      --warn:      #C8601A;
+      --warn-lt:   #FDF0E5;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--blue-pale);
+      min-height: 100vh;
+      display: flex;
+      color: var(--blue);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--blue);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      padding: 28px 24px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .brand-row { display: flex; align-items: center; gap: 12px; }
+
+    .brand-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IM Fell English', serif;
+      font-size: 15px; color: #fff; flex-shrink: 0;
+    }
+
+    .brand-label { line-height: 1.3; }
+    .brand-label strong { display: block; color: #fff; font-size: 13px; }
+    .brand-label span { color: rgba(255,255,255,.45); font-size: 11px; }
+
+    nav { padding: 16px 0; flex: 1; }
+
+    .nav-section {
+      padding: 8px 16px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 20px;
+      font-size: 13.5px;
+      color: rgba(255,255,255,.6);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: color .15s, background .15s, border-color .15s;
+      text-decoration: none;
+    }
+
+    .nav-item svg { flex-shrink: 0; opacity: .7; }
+
+    .nav-item:hover {
+      color: #fff;
+      background: rgba(255,255,255,.06);
+    }
+
+    .nav-item.active {
+      color: #fff;
+      background: rgba(255,255,255,.1);
+      border-left-color: var(--gold);
+      font-weight: 500;
+    }
+
+    .nav-item.active svg { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-info strong { display: block; font-size: 12.5px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-info span   { font-size: 11px; color: rgba(255,255,255,.4); }
+
+    .logout-btn {
+      background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35);
+      display: flex; padding: 4px; border-radius: 4px;
+      transition: color .15s;
+    }
+    .logout-btn:hover { color: rgba(255,255,255,.8); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 32px;
+      max-width: calc(100vw - var(--sidebar-w));
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .page-title { font-family: 'IM Fell English', serif; font-size: 28px; color: var(--blue); }
+    .page-sub   { font-size: 13px; color: var(--grey); margin-top: 2px; }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .date-chip {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--blue);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      border: none; transition: background .15s, transform .1s;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--blue-mid); }
+
+    .btn-ghost {
+      background: #fff;
+      color: var(--blue);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--blue-pale); }
+
+    .btn-danger { background: #FFEAEA; color: #C0392B; border: 1.5px solid #FFD0D0; }
+    .btn-danger:hover { background: #FFD0D0; }
+
+    .btn-sm { padding: 7px 14px; font-size: 12.5px; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: .05s; }
+    .stat-card:nth-child(2) { animation-delay: .10s; }
+    .stat-card:nth-child(3) { animation-delay: .15s; }
+    .stat-card:nth-child(4) { animation-delay: .20s; }
+
+    .sc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+
+    .sc-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sc-icon.blue   { background: var(--blue-lt); color: var(--blue-mid); }
+    .sc-icon.gold   { background: var(--gold-lt);  color: var(--gold); }
+    .sc-icon.green  { background: var(--success-lt); color: var(--success); }
+    .sc-icon.orange { background: var(--warn-lt);  color: var(--warn); }
+
+    .sc-badge {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px;
+    }
+
+    .sc-badge.up   { background: var(--success-lt); color: var(--success); }
+    .sc-badge.down { background: var(--warn-lt);    color: var(--warn); }
+
+    .sc-n { font-size: 30px; font-weight: 600; color: var(--blue); line-height: 1; }
+    .sc-l { font-size: 12.5px; color: var(--grey); margin-top: 4px; }
+
+    /* ── CONTENT ROW ── */
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeUp .5s .2s ease both;
+    }
+
+    .card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .card-title { font-size: 15px; font-weight: 600; color: var(--blue); }
+    .card-sub   { font-size: 12px; color: var(--grey); margin-top: 2px; }
+
+    /* ── EVENT TABLE ── */
+    .event-table { width: 100%; border-collapse: collapse; }
+
+    .event-table th {
+      text-align: left;
+      padding: 12px 24px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--grey);
+      background: var(--blue-pale);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .event-table td {
+      padding: 14px 24px;
+      font-size: 13.5px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .event-table tr:last-child td { border-bottom: none; }
+
+    .event-table tr:hover td { background: var(--blue-pale); }
+
+    .ev-title { font-weight: 500; color: var(--blue); }
+    .ev-venue { font-size: 12px; color: var(--grey); margin-top: 2px; }
+
+    .time-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--blue-pale);
+      color: var(--blue-mid);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .pill-upcoming { background: var(--blue-lt); color: var(--blue-mid); }
+    .pill-live     { background: var(--success-lt); color: var(--success); }
+    .pill-done     { background: #F0F0F5; color: #888; }
+
+    .action-row { display: flex; gap: 6px; }
+
+    /* ── SIDE PANEL ── */
+    .side-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    .mini-calendar {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      animation: fadeUp .5s .25s ease both;
+    }
+
+    .cal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .cal-month { font-weight: 600; font-size: 14px; color: var(--blue); }
+
+    .cal-nav {
+      background: none; border: none; cursor: pointer; color: var(--grey);
+      display: flex; align-items: center; padding: 4px;
+      border-radius: 6px; transition: background .15s;
+    }
+    .cal-nav:hover { background: var(--blue-pale); color: var(--blue); }
+
+    .cal-days-head {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      color: var(--grey);
+      margin-bottom: 6px;
+    }
+
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12.5px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--blue);
+      transition: background .15s, color .15s;
+    }
+
+    .cal-day:hover { background: var(--blue-pale); }
+    .cal-day.other { color: var(--border); }
+    .cal-day.today { background: var(--blue); color: #fff; font-weight: 600; }
+    .cal-day.has-event::after {
+      content: ''; display: block;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--gold);
+      position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+    }
+    .cal-day.has-event { position: relative; }
+
+    /* Notifications mini panel */
+    .notif-panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      animation: fadeUp .5s .3s ease both;
+    }
+
+    .notif-title { font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 14px; }
+
+    .notif-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .notif-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .notif-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+    }
+
+    .dot-blue   { background: var(--blue-mid); }
+    .dot-gold   { background: var(--gold); }
+    .dot-green  { background: var(--success); }
+
+    .notif-text { font-size: 12.5px; color: var(--blue); line-height: 1.5; }
+    .notif-time { font-size: 11px; color: var(--grey); margin-top: 2px; }
+
+    /* ── ADD EVENT MODAL ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,20,50,.55);
+      backdrop-filter: blur(3px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+
+    .overlay.open { opacity: 1; pointer-events: auto; }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%; max-width: 480px;
+      padding: 32px;
+      box-shadow: 0 24px 64px rgba(0,30,80,.18);
+      transform: translateY(20px);
+      transition: transform .25s ease;
+    }
+
+    .overlay.open .modal { transform: translateY(0); }
+
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .modal-title { font-family: 'IM Fell English', serif; font-size: 22px; color: var(--blue); }
+    .modal-sub   { font-size: 13px; color: var(--grey); margin-top: 3px; }
+
+    .close-btn {
+      background: var(--blue-pale); border: none; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--grey); transition: background .15s, color .15s;
+    }
+    .close-btn:hover { background: var(--blue-lt); color: var(--blue); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--blue); letter-spacing: .03em; margin-bottom: 6px; }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      color: var(--blue);
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-input:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(0,87,168,.08); }
+
+    select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A9BB5' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+    /* ── SUCCESS TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: var(--blue);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,30,80,.22);
+      z-index: 300;
+      transform: translateY(20px); opacity: 0;
+      transition: transform .3s, opacity .3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-row { grid-template-columns: 1fr; }
+      .side-panel { flex-direction: row; flex-wrap: wrap; }
+      .mini-calendar, .notif-panel { flex: 1; min-width: 240px; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; max-width: 100vw; padding: 20px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-row">
+      <div class="brand-icon">IIT</div>
+      <div class="brand-label">
+        <strong>IIT Patna</strong>
+        <span>Event Reminder</span>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-section">Main</div>
+
+    <a class="nav-item active" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+
+    <a class="nav-item" href="#" onclick="openModal();return false;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="15" x2="12" y2="15.01" stroke-width="3"/></svg>
+      Add Event
+    </a>
+
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Manage Events
+    </a>
+
+    <div class="nav-section" style="margin-top:12px;">Settings</div>
+
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">SK</div>
+      <div class="user-info">
+        <strong>Dr. S. Kumar</strong>
+        <span>Administrator</span>
+      </div>
+      <button class="logout-btn" title="Logout" onclick="window.location.href='admin-login.html'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-sub">Campus Immersion — Summer 2025 Schedule</p>
+    </div>
+    <div class="topbar-right">
+      <div class="date-chip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="todayDate">Loading...</span>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Event
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="sc-top">
+        <div class="sc-icon blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <span class="sc-badge up">↑ 3</span>
+      </div>
+      <div class="sc-n">12</div>
+      <div class="sc-l">Total Events Today</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-top">
+        <div class="sc-icon green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span class="sc-badge up">On track</span>
+      </div>
+      <div class="sc-n">8</div>
+      <div class="sc-l">Completed Events</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-top">
+        <div class="sc-icon gold">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <span class="sc-badge up">Live</span>
+      </div>
+      <div class="sc-n">2</div>
+      <div class="sc-l">Ongoing Events</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-top">
+        <div class="sc-icon orange">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <span class="sc-badge up">Sent: 24</span>
+      </div>
+      <div class="sc-n">2</div>
+      <div class="sc-l">Upcoming Events</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-row">
+
+    <!-- Events table -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Today's Schedule</div>
+          <div class="card-sub">All immersion events for today</div>
+        </div>
+        <button class="btn btn-ghost btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          Filter
+        </button>
+      </div>
+      <table class="event-table">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Time</th>
+            <th>Venue</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="eventTableBody">
+          <!-- populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+
+      <!-- Mini calendar -->
+      <div class="mini-calendar">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="cal-month" id="calMonth">July 2025</span>
+          <button class="cal-nav" onclick="changeMonth(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="cal-days-head">
+          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
+          <span>Th</span><span>Fr</span><span>Sa</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="notif-panel">
+        <div class="notif-title">Recent Notifications</div>
+
+        <div class="notif-item">
+          <div class="notif-dot dot-blue"></div>
+          <div>
+            <div class="notif-text">Reminder sent: <strong>ML Workshop</strong> starts in 30 min</div>
+            <div class="notif-time">2 min ago · 68 students</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot dot-gold"></div>
+          <div>
+            <div class="notif-text">Reminder sent: <strong>Lab Session 3</strong> starts in 15 min</div>
+            <div class="notif-time">17 min ago · 68 students</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot dot-green"></div>
+          <div>
+            <div class="notif-text">Reminder sent: <strong>Inauguration</strong> starts in 5 min</div>
+            <div class="notif-time">1 hr ago · 68 students</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot dot-blue"></div>
+          <div>
+            <div class="notif-text">New event added: <strong>Research Talk</strong></div>
+            <div class="notif-time">3 hr ago</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ── ADD EVENT MODAL ── -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Add New Event</div>
+        <div class="modal-sub">Fill in the details below to schedule an event.</div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Event Title *</label>
+      <input class="form-input" type="text" id="evTitle" placeholder="e.g., Machine Learning Workshop"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="form-input" type="date" id="evDate"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Venue *</label>
+        <input class="form-input" type="text" id="evVenue" placeholder="e.g., LH-1"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Start Time *</label>
+        <input class="form-input" type="time" id="evStart"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Time</label>
+        <input class="form-input" type="time" id="evEnd"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-input" id="evCat">
+        <option value="">Select category</option>
+        <option>Academic</option>
+        <option>Workshop</option>
+        <option>Lab Session</option>
+        <option>Social / Non-academic</option>
+        <option>Administrative</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description (optional)</label>
+      <input class="form-input" type="text" id="evDesc" placeholder="Brief description of the event…"/>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addEvent()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Save Event
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Event added successfully!</span>
+</div>
+
+<script>
+// ── Sample events ──────────────────────────────────
+let events = [
+  { title: 'Inauguration Ceremony', venue: 'Auditorium', start: '09:00', end: '10:00', status: 'done' },
+  { title: 'Introduction to ML', venue: 'LH-1', start: '10:30', end: '12:00', status: 'done' },
+  { title: 'Lab Session 3 – Python', venue: 'CS Lab', start: '12:00', end: '13:30', status: 'live' },
+  { title: 'Lunch Break', venue: 'Mess', start: '13:30', end: '14:30', status: 'live' },
+  { title: 'ML Workshop', venue: 'LH-2', start: '14:30', end: '16:30', status: 'upcoming' },
+  { title: 'Research Talk by Prof. Rao', venue: 'Seminar Hall', start: '17:00', end: '18:30', status: 'upcoming' },
+];
+
+function renderTable() {
+  const tbody = document.getElementById('eventTableBody');
+  tbody.innerHTML = events.map((e, i) => `
+    <tr>
+      <td>
+        <div class="ev-title">${e.title}</div>
+      </td>
+      <td>
+        <span class="time-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${e.start}${e.end ? ' – ' + e.end : ''}
+        </span>
+      </td>
+      <td style="color:var(--grey);font-size:13px;">${e.venue}</td>
+      <td>
+        <span class="status-pill pill-${e.status}">
+          ${e.status === 'done' ? '✓ Done' : e.status === 'live' ? '● Live' : '◌ Upcoming'}
+        </span>
+      </td>
+      <td>
+        <div class="action-row">
+          <button class="btn btn-ghost btn-sm" onclick="editEvent(${i})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteEvent(${i})">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function editEvent(i) {
+  const e = events[i];
+  document.getElementById('evTitle').value = e.title;
+  document.getElementById('evVenue').value = e.venue;
+  document.getElementById('evStart').value = e.start;
+  document.getElementById('evEnd').value   = e.end || '';
+  openModal();
+  showToast('Editing: ' + e.title);
+}
+
+function deleteEvent(i) {
+  if (confirm('Delete "' + events[i].title + '"?')) {
+    events.splice(i, 1);
+    renderTable();
+    showToast('Event deleted.');
+  }
+}
+
+// ── Modal ──────────────────────────────────────────
+function openModal() {
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  clearModal();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+function clearModal() {
+  ['evTitle','evDate','evVenue','evStart','evEnd','evDesc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('evCat').value = '';
+}
+
+function addEvent() {
+  const title = document.getElementById('evTitle').value.trim();
+  const venue = document.getElementById('evVenue').value.trim();
+  const start = document.getElementById('evStart').value;
+
+  if (!title || !venue || !start) {
+    alert('Please fill in Event Title, Venue and Start Time.');
+    return;
+  }
+
+  events.unshift({
+    title, venue, start,
+    end: document.getElementById('evEnd').value,
+    status: 'upcoming'
+  });
+
+  renderTable();
+  closeModal();
+  showToast('Event "' + title + '" added!');
+}
+
+// ── Toast ──────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Calendar ───────────────────────────────────────
+let calYear, calMonth;
+
+function initCal() {
+  const now = new Date();
+  calYear  = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCal();
+}
+
+function changeMonth(d) {
+  calMonth += d;
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  renderCal();
+}
+
+function renderCal() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonth').textContent = months[calMonth] + ' ' + calYear;
+
+  const grid = document.getElementById('calGrid');
+  const today = new Date();
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const days  = new Date(calYear, calMonth + 1, 0).getDate();
+  const eventDays = [3, 7, 12, 15, 18, 22];
+
+  let html = '';
+  for (let i = 0; i < first; i++) {
+    const d = new Date(calYear, calMonth, 0).getDate() - first + i + 1;
+    html += `<div class="cal-day other">${d}</div>`;
+  }
+  for (let d = 1; d <= days; d++) {
+    const isToday = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+    const hasEv   = eventDays.includes(d);
+    html += `<div class="cal-day${isToday ? ' today' : ''}${hasEv ? ' has-event' : ''}">${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ── Date display ───────────────────────────────────
+function initDate() {
+  const d = new Date();
+  const opts = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('todayDate').textContent = d.toLocaleDateString('en-IN', opts);
+}
+
+// ── Init ───────────────────────────────────────────
+initDate();
+initCal();
+renderTable();
+</script>
+</body>
+</html>
